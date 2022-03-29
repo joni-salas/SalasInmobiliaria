@@ -21,9 +21,10 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: InquilinoControllerscs/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Detalles(int id)
         {
-            return View();
+            var inquilino = repositorio.ObtenerPorId(id);
+            return View(inquilino);
         }
 
         // GET: InquilinoControllerscs/Create

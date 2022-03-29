@@ -31,7 +31,7 @@ namespace SalasInmobiliaria.Models
                     comm.Parameters.AddWithValue("@email", p.Email);
                     comm.Parameters.AddWithValue("@clave", p.Clave);
                     conn.Open();
-                    res = Convert.ToInt32(comm.ExecuteScalar()); // ultimo id de la BD
+                    res = Convert.ToInt32(comm.ExecuteScalar()); // ultimo id de  la BD
                     p.Id = res;
                     conn.Close();
                 }

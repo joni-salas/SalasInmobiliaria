@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SalasInmobiliaria.Models;
 
@@ -7,6 +8,7 @@ namespace SalasInmobiliaria.Controllers
     public class PropietarioController : Controller
     {
         private readonly RepositorioPropietario repositorio;
+        private readonly IConfiguration config;
 
         public PropietarioController()
         {
@@ -20,9 +22,10 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: PropietarioController/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Detalles(int id)
         {
-            return View();
+            var propietario =repositorio.ObtenerPorId(id);
+            return View(propietario);
         }
 
         // GET: PropietarioController/Create
@@ -46,6 +49,7 @@ namespace SalasInmobiliaria.Controllers
                 p.Email = collection["Email"];
                 p.Clave = collection["Clave"];
 
+                // preguntar como hashear la clave del propietario
                 repositorio.Alta(p);
 
                 TempData["Mensaje"] = "Propietario creado correctamente";
@@ -62,8 +66,8 @@ namespace SalasInmobiliaria.Controllers
         // GET: PropietarioController/Edit/5
         public ActionResult Editar(int id)
         {
-            var inquilino = repositorio.ObtenerPorId(id);
-            return View(inquilino);//pasa el modelo a la vista
+            var propietario = repositorio.ObtenerPorId(id);
+            return View(propietario);//pasa el modelo a la vista
         }
 
         // POST: PropietarioController/Edit/5
