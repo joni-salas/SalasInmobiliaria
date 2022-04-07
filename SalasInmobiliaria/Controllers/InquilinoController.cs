@@ -54,6 +54,7 @@ namespace SalasInmobiliaria.Controllers
                 i.Dni = collection["Dni"];
                 i.Telefono = collection["Telefono"];
                 i.Email = collection["Email"];
+                i.Estado = true;
 
                 repositorio.Alta(i);
 
@@ -116,11 +117,16 @@ namespace SalasInmobiliaria.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(int id, IFormCollection collection)
         {
+            Inquilino i = null;
             try
             {
 
-                repositorio.Baja(id);
-                TempData["Mensaje"] = "El inquilino fue eliminado correctamente";
+                i = repositorio.ObtenerPorId(id);
+                i.Estado = false;
+                //Console.WriteLine(i.Estado);
+                repositorio.Baja(i);
+
+                TempData["Mensaje"] = "Datos guardados correctamente";
 
                 return RedirectToAction(nameof(Index));
             }

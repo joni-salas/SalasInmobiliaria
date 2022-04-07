@@ -263,7 +263,6 @@ ServiceFabricBackup/
 
 # SQL Server files
 *.ndf
-
 # Business Intelligence projects
 *.rdl.data
 *.bim.layout

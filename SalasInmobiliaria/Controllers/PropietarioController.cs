@@ -18,6 +18,7 @@ namespace SalasInmobiliaria.Controllers
         public ActionResult Index()
         {
             var lista = repositorio.ObtenerTodos();
+            
             return View(lista);
         }
 
@@ -48,6 +49,7 @@ namespace SalasInmobiliaria.Controllers
                 p.Telefono = collection["Telefono"];
                 p.Email = collection["Email"];
                 p.Clave = collection["Clave"];
+                p.Estado = true;
 
                 // preguntar como hashear la clave del propietario
                 repositorio.Alta(p);
@@ -111,10 +113,17 @@ namespace SalasInmobiliaria.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(int id, IFormCollection collection)
         {
+            Propietario p = null;
             try
             {
-                repositorio.Baja(id);
-                TempData["Mensaje"] = "Eliminación realizada correctamente";
+
+                p = repositorio.ObtenerPorId(id);
+                p.Estado = false;
+                //Console.WriteLine(p.Estado);
+                repositorio.Baja(p);
+
+                TempData["Mensaje"] = "Datos guardados correctamente";
+
                 return RedirectToAction(nameof(Index));
             }
             catch
