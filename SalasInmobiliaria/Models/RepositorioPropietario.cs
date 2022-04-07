@@ -104,6 +104,7 @@ namespace SalasInmobiliaria.Models
                     var reader = command.ExecuteReader();
                     while (reader.Read())
                     {
+
                         Propietario p = new Propietario
                         {
                             Id = reader.GetInt32(0),
