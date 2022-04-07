@@ -19,7 +19,9 @@ namespace SalasInmobiliaria.Models
         [Required]
         public string Email { get; set; }
         [Required]
-        public string Clave { get; set; } 
+        public string Clave { get; set; }
+        [Required]
+        public bool Estado { get; set; }
 
 
     }

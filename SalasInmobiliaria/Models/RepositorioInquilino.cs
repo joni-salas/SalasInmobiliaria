@@ -17,8 +17,8 @@ namespace SalasInmobiliaria.Models
             int res = -1;
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string sql = "INSERT INTO Inquilino (Nombre, Apellido, Dni, Telefono,Email)" +
-                    $"VALUES (@nombre, @apellido, @dni,@telefono,@email);" +
+                string sql = "INSERT INTO Inquilino (Nombre, Apellido, Dni, Telefono,Email, Estado)" +
+                    $"VALUES (@nombre, @apellido, @dni,@telefono,@email, @estado);" +
                     "SELECT SCOPE_IDENTITY();";// devuelve el ultimo id insertado
                 using (SqlCommand command = new SqlCommand(sql, conn))
                 {
@@ -28,6 +28,7 @@ namespace SalasInmobiliaria.Models
                     command.Parameters.AddWithValue("@dni", i.Dni);
                     command.Parameters.AddWithValue("@telefono", i.Telefono);
                     command.Parameters.AddWithValue("@email", i.Email);
+                    command.Parameters.AddWithValue("@estado", i.Estado);
                     conn.Open();
                     res = Convert.ToInt32(command.ExecuteScalar());
                     i.Id = res;
@@ -44,7 +45,7 @@ namespace SalasInmobiliaria.Models
 
             using(SqlConnection conn = new SqlConnection(connectionString))
             {
-                string sql = @"SELECT Id,Nombre,Apellido,Dni,Telefono,Email
+                string sql = @"SELECT Id,Nombre,Apellido,Dni,Telefono,Email,Estado
                                    FROM Inquilino;";
                 using(SqlCommand comm = new SqlCommand(sql, conn))
                 {
@@ -60,8 +61,13 @@ namespace SalasInmobiliaria.Models
                             Dni = reader.GetString(3),
                             Telefono = reader.GetString(4),
                             Email = reader.GetString(5),
+                            Estado = reader.GetBoolean(6),
                         };
-                        res.Add(inquilino);
+                        if (inquilino.Estado)
+                        {
+                            res.Add(inquilino);
+                        }
+                        //res.Add(inquilino);
 
                     }
                     conn.Close();     
@@ -71,16 +77,18 @@ namespace SalasInmobiliaria.Models
             return res;
         }
 
-        public int Baja(int id)
+        public int Baja(Inquilino p)
         {
             int res = -1;
             using(SqlConnection conn = new SqlConnection(connectionString))
             {
-                string sql = "DELETE FROM Inquilino WHERE Id = @id";
+                string sql = $"UPDATE Inquilino SET Estado=@estado " +
+                    $"WHERE Id = @id";
                 using (SqlCommand comm = new SqlCommand(sql, conn))
                 {
                     comm.CommandType = CommandType.Text; // nose que hace esto
-                    comm.Parameters.AddWithValue("@id", id);
+                    comm.Parameters.AddWithValue("@estado", p.Estado);
+                    comm.Parameters.AddWithValue("@id", p.Id);
                     conn.Open();
                     res = comm.ExecuteNonQuery();
                     conn.Close();
@@ -106,6 +114,7 @@ namespace SalasInmobiliaria.Models
                     comm.Parameters.AddWithValue("@dni", i.Dni);
                     comm.Parameters.AddWithValue("@telefono", i.Telefono);
                     comm.Parameters.AddWithValue("@email", i.Email);
+                    comm.Parameters.AddWithValue("@estado", i.Estado);
                     comm.Parameters.AddWithValue("@id", i.Id);
                     conn.Open();
                     res = comm.ExecuteNonQuery();
@@ -121,7 +130,7 @@ namespace SalasInmobiliaria.Models
             Inquilino inquilino = null;
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
-                string sql = $"SELECT Id,Nombre,Apellido,Dni,Telefono,Email FROM Inquilino" +
+                string sql = $"SELECT Id,Nombre,Apellido,Dni,Telefono,Email,Estado FROM Inquilino" +
                         $" WHERE Id = @id";
                 using(SqlCommand comm = new SqlCommand(sql, conn))
                 {
@@ -139,6 +148,7 @@ namespace SalasInmobiliaria.Models
                             Dni = reader.GetString(3),
                             Telefono = reader.GetString(4),
                             Email = reader.GetString(5),
+                            Estado = reader.GetBoolean(6),
 
                         };
                     }
