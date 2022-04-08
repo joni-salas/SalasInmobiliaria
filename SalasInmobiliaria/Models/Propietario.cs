@@ -23,6 +23,11 @@ namespace SalasInmobiliaria.Models
         [Required]
         public bool Estado { get; set; }
 
+        public override string ToString()
+        {
+            return this.Nombre + this.Apellido;
+        }
+
 
     }
 }
