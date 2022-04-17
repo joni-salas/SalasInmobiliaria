@@ -19,5 +19,9 @@ namespace SalasInmobiliaria.Models
         public string Email { get; set; }
         [Required]
         public Boolean Estado { get; set; }
+        public override string ToString()
+        {
+            return $"{Nombre} { Apellido}";
+        }
     }
 }

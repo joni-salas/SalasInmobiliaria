@@ -17,7 +17,7 @@ namespace SalasInmobiliaria.Controllers
         // GET: InmuebleController
         public ActionResult Index()
         {
-            var lista = repositorio.ObtenerTodos();
+            var lista = repositorio.ObtenerActivosInactivosAlquilados();
             if (TempData.ContainsKey("Id"))
                 ViewBag.Id = TempData["Id"];
             if (TempData.ContainsKey("Mensaje"))
@@ -38,7 +38,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: InmuebleController/Details/5
-        public ActionResult Details(int id)
+        public ActionResult Detalles(int id)
         {
             var inmueble = repositorio.ObtenerPorId(id);
             return View(inmueble);

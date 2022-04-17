@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Editar";
     //var Propietario = (IList<Propietario>)ViewBag.Propietario;
-
+    
 }
 
 <h1>Editar</h1>
@@ -38,6 +38,16 @@
                 <label asp-for="Superficie" class="control-label"></label>
                 <input asp-for="Superficie" class="form-control" />
                 <span asp-validation-for="Superficie" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Estado</label>
+                <select class="form-control" name="Estado">
+                    
+                   <option value="1">Activo</option>
+                   <option value="Alquilado">Alquilado</option>
+                    
+                </select>
+                <span asp-validation-for="Estado" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label class="control-label">Propietario</label>

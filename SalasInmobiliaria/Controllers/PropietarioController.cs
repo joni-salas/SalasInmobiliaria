@@ -8,7 +8,7 @@ namespace SalasInmobiliaria.Controllers
     public class PropietarioController : Controller
     {
         private readonly RepositorioPropietario repositorio;
-        private readonly IConfiguration config;
+        //private readonly IConfiguration config;
 
         public PropietarioController()
         {
