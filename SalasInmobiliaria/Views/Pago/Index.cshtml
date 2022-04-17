@@ -1,0 +1,57 @@
+﻿@model IEnumerable<SalasInmobiliaria.Models.Pago>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Importe)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NPago)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Fecha)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdContrato)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Importe)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NPago)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Fecha)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdContrato)
+            </td>
+            <td>
+                <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"><i class="fa-solid fa-trash-can"></i></a>&nbsp;
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

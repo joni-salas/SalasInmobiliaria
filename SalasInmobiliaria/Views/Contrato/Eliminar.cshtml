@@ -1,0 +1,74 @@
+﻿@model SalasInmobiliaria.Models.Contrato
+
+@{
+    ViewData["Title"] = "Eliminar";
+}
+
+<h1>Eliminar</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Contrato</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Id)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.NombreGarante)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.NombreGarante)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TelefonoGarante)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TelefonoGarante)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DniGarante)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DniGarante)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Monto)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Monto)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FechaInicio)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FechaInicio)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.FechaFin)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.FechaFin)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.IdInquilino)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.IdInquilino)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.IdInmueble)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.IdInmueble)
+        </dd>
+    </dl>
+    
+    <form asp-action="Eliminar">
+        <input type="submit" value="Eliminar" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

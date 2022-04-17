@@ -14,10 +14,16 @@ namespace SalasInmobiliaria.Models
         public string Precio { get; set; }
         public string Superficie { get; set; } 
         public string Estado { get; set; }
+
         [Display(Name = "Dueño")]
         public int IdPropietario { get; set; }
         [ForeignKey(nameof(IdPropietario))]
         public Propietario prop { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Direccion}";
+        }
 
     }
 }

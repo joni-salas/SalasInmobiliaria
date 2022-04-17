@@ -1,0 +1,198 @@
+﻿@model IEnumerable<SalasInmobiliaria.Models.Contrato>
+
+@{
+    ViewData["Title"] = "Index";
+
+    var Pagos = (IList<Pago>)ViewBag.Pagos;
+
+
+}
+
+
+
+<h1>Listado de Contratos</h1>
+
+<p>
+    <a asp-action="Create"> Crear contrato</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NombreGarante)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TelefonoGarante)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DniGarante)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Monto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaInicio)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FechaFin)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdInquilino)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdInmueble)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NombreGarante)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TelefonoGarante)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DniGarante)
+            </td>
+            <td>
+               $ @Html.DisplayFor(modelItem => item.Monto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaInicio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaFin)
+            </td>
+            <td>
+                @Html.ActionLink(item.Inqui.ToString(), "PorInquilino", new {  id=item.Inqui.Id  })
+            </td>
+            <td>
+                @Html.ActionLink(item.Inmu.ToString(), "PorInmueble", new {  id=item.Inmu.Id  })
+            </td>
+            <td>
+                <a asp-action="Editar" asp-route-id="@item.Id" title="Editar"><i class="fa-solid fa-pen"></i></a>&nbsp;
+                <a asp-action="Eliminar" asp-route-id="@item.Id" title="Eliminar"><i class="fa-solid fa-trash-can"></i></a>&nbsp;
+               @* <button title="Pagos" onclick="llenarTabla(@item.Id)"><i class="fa-solid fa-dollar-sign"></i></button>&nbsp;*@
+                <a id="btnPagos" href="" data-bs-toggle="modal" data-bs-target="#ModalPagos" onclick="llenarTabla(@item.Id);"><i class="fa-solid fa-dollar-sign"></i></a>
+                <a id="btnPagar" href="" data-bs-toggle="modal" data-bs-target="#ModalCrearPago@{@item.Id}" ><i class="fa-solid fa-cart-shopping"></i></a>
+
+                @*-----------------------------------------------------------Modal CREAR PAGO-----------------------------------------------------------*@
+
+                <div class="modal fade" id="ModalCrearPago@{@item.Id}" tabindex="-1" aria-labelledby="crearModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="crearModalLabel">Crear Pago</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form asp-action="CrearPago" asp-controller="Contrato" asp-route-id="@item.Id" method="post">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    
+                                    <div class="form-group">
+                                        <label for="" class="control-label">Importe a pagar</label>
+
+                                    </div>
+                                    <div class="form-Importe">
+                                        <label for="Importe" class="control-label">Cuota Mensual</label>
+                                        <br>
+                                        <input name="Importe" class="form-control" placeholder="$"/>
+                                        <br>
+                                        <span for="Importe" class="text-danger"></span>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="submit" value="Pagar" class="btn btn-primary" />
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+
+
+@*-----------------------------------------------------------Modal PAGOS X CONTRATO-----------------------------------------------------------*@
+
+<div class="modal fade" id="ModalPagos" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalToggleLabel"> Pagos </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Codigo de Pago
+                    </th>
+                    <th>
+                        Fecha de Pago
+                    </th>
+                    <th>
+                        $ Monto
+                    </th>
+                    <th>
+                        Numero de pago
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="ModalTablePagos">
+        
+            </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+
+    function llenarTabla(id){
+        $.ajax({
+            type:'GET',
+            url:'@Url.Action("PagoPorContrato","Contrato")',
+            data: {'id': id},
+            success: function (data){
+                $('#ModalTablePagos').html("")
+                console.log(data)
+                if(data.length != 0){
+                    data.forEach(function(e)
+                            {
+                                var fecha = e.fecha.split("T")
+                                console.log(fecha)
+                                var mostrar = fecha[0].split("-")
+
+                                $('#ModalTablePagos').append(`<tr>` + `<td> ${e.id} </td>` +  `<td> ${mostrar[2]}/${mostrar[1]}/${mostrar[0]} </td>` + `<td> $ ${e.importe} </td>` + `<td> ${e.nPago} </td>` + `</tr>`) 
+      
+                            })
+                }
+             }
+        })
+    }
+
+
+
+
+
+    
+</script>
