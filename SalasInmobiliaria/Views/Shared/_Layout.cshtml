@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/Boostrap.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/SalasInmobiliaria.styles.css" asp-append-version="true" />
+    <link rel="icon" href="~/img/favicon5.png" type="image/x-icon" />
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -17,55 +18,149 @@
 <body id="body" style="display: grid; grid-template-rows: auto 1fr auto">
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
-          <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SalasInmobiliaria</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-            <div class="collapse navbar-collapse justify-content-center" id="navbarTogglerDemo02">
-                <ul class="navbar-nav ">
-                    <li class="nav-item">
-                            <a class="nav-link " asp-area="" asp-controller="Inquilino" asp-action="Index">Inquilinos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link " asp-area="" asp-controller="Propietario" asp-action="Index">Propietarios</a>
-                        </li>
-                        <li class="nav-item" >
-                            <a class="nav-link " asp-area="" asp-controller="Inmueble" asp-action="Index">Inmuebles</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link " asp-area="" asp-controller="Contrato" asp-action="Index">Contratos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link " asp-area="" asp-controller="Pago" asp-action="Index">Pagos</a>
-                        </li>
-                </ul>
+            @if (!User.Identity.IsAuthenticated)
+            { 
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SalasInmobiliaria</a>
                 
-            </div>
+                <a class="justify-content-end" href="@Url.Link("login", null)"><i class="fa-solid fa-door-open"></i> Entrar</a>
+            }
+            else
+            {
+                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SalasInmobiliaria</a>
+                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                  </button>
+                    <div class="collapse navbar-collapse justify-content-center" id="navbarTogglerDemo02">
+                        <ul class="navbar-nav ">
+                            <li class="nav-item">
+                                    <a class="nav-link " asp-area="" asp-controller="Inquilino" asp-action="Index">Inquilinos</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " asp-area="" asp-controller="Propietario" asp-action="Index">Propietarios</a>
+                                </li>
+                                <li class="nav-item" >
+                                    <a class="nav-link " asp-area="" asp-controller="Inmueble" asp-action="Index">Inmuebles</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " asp-area="" asp-controller="Contrato" asp-action="Index">Contratos</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link " asp-area="" asp-controller="Pago" asp-action="Index">Pagos</a>
+                                </li>
+                                @if (User.IsInRole("Administrador") || User.IsInRole("SuperAdministrador"))
+					            {
+                                    <li class="nav-item">
+                                        <a class="nav-link " asp-area="" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
+                                    </li>
+                                }
+                        </ul>
+                
+                    </div>
                         
-            <div class="text-white">
-                 <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                   <i class="fa-regular fa-user "></i>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-end " >
-                      <li ><a class="dropdown-item" href="#">Editar Perfil</a></li>
-                      <li><a class="dropdown-item" href="#">Cambiar Contraseña</a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="#">Cerrar Sesión <i class="fa-solid fa-arrow-right-from-bracket"></i></a></li>
-                  </ul>
-            </div>             
+                    <div class="text-white">
+                         <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           <i class="fa-regular fa-user "></i>
+                          </a>
+                          <ul class="dropdown-menu dropdown-menu-end " >
+                              <li ><a class="dropdown-item" >Editar Perfil</a></li>
+                              <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#CambiarContraseña">Cambiar Contraseña</a></li>
+                              <li><hr class="dropdown-divider"></li>
+                              <li><a class="dropdown-item" asp-controller="Usuarios" asp-action="Logout">Cerrar Sesión <i class="fa-solid fa-arrow-right-from-bracket"></i></a></li>
+                          </ul>
+                    </div>   
+            }
 
         </nav>
+        @* ---------------------------------------------------------------MODAL CAMBIAR CONTRASEÑA---------------------------------------------------------*@
+
+
+                    <div class="modal fade" id="CambiarContraseña" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Cambio de contraseña</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form asp-controller="Usuarios" asp-action="CambiarContraseña">
+                                  <div class="mb-3">
+                                    <label for="contraActual" class="form-label">Contraseña Actual</label>
+                                    <input type="password" class="form-control" id="contraActual" name="contraActual">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="ContraNueva" class="form-label">Contraseña Nueva</label>
+                                    <input type="password" class="form-control" id="ContraNueva" name="ContraNueva">
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="ContraNuevaRepe" class="form-label">Confirmar Contraseña</label>
+                                    <input type="password" class="form-control" id="ContraNuevaRepe" name="ContraNuevaRepe">
+                                  </div>
+
+                                  <button type="submit" class="btn btn-primary" >Cambiar Contraseña</button>
+                                </form>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
 
     </header>
-    <div class="container">
+    <div class="container" >
         <main role="main" class="pb-3">
             
-
+            <div class="">
+			    @if (ViewBag.Id != null)    // --------------------------------------------------MODIFICAR MENSAJES DE ALERTA---------------------------//
+			    {//alta exitosa
+				    <div class="alert alert-success alert-dismissible fade show" role="alert">
+					    <strong>¡Éxito!</strong> Esto es un mensaje de alerta: @ViewBag.Id
+					    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						    <span aria-hidden="true"><span class="lnr lnr-cross-circle"></span></span>
+					    </button>
+				    </div>
+			    }
+			    else if (ViewBag.Mensaje != null)
+			    {//cartel general
+				    <div class="alert alert-info alert-dismissible fade show" role="alert">
+					    <strong>Información:</strong> @ViewBag.Mensaje
+					    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						    <span aria-hidden="true"><span class="lnr lnr-cross-circle"></span></span>
+					    </button>
+				    </div>
+			    }
+			    else if (ViewBag.Error != null)
+			    {//alta exitosa
+				    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+					    <strong>¡Error!</strong> @ViewBag.Error
+					    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						    <span aria-hidden="true"><span class="lnr lnr-cross-circle"></span></span>
+					    </button>
+				    </div>
+			    }
+			    else if (!String.IsNullOrWhiteSpace(ViewBag.Error))
+			    {//ocurrió un error
+				    <environment names="Development">
+					    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+						    <strong>¡Error!</strong> Ocurrió: @ViewBag.Error
+						    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							    <span aria-hidden="true"><span class="lnr lnr-cross-circle"></span></span>
+						    </button>
+						    <a class="btn btn-primary" data-toggle="collapse" href="#multiCollapseExample1" role="button" aria-expanded="false"><span class="lnr lnr-plus-circle"></span></a>
+						    <div class="collapse multi-collapse" id="multiCollapseExample1">
+							    @ViewBag.StackTrace
+						    </div>
+					    </div>
+				    </environment>
+			    }
+            </div>
+            
             @RenderBody()
         </main>
+            <br />
+            <br />
+            <br />
     </div>
 
-    <footer class="border-top footer text-muted ">
+    <footer class="border-top footer text-muted">
+
         <div class="container">
 
             &copy; 2022 - SalasInmobiliaria - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -79,20 +174,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/js/all.min.js" integrity="sha512-6PM0qYu5KExuNcKt5bURAoT6KCThUmHRewN3zUFNaoI6Di7XJPTMoT6K0nsagZKk2OB4L7E3q1uQKHNHd4stIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.2/js/jquery.dataTables.js"></script>
+@*    <script src="//momentjs.com/downloads/moment.min.js"></script>*@
 
-    @await RenderSectionAsync("Scripts", required: false)
+
+    
     <script>
        $(document).ready(function(){
 
             $('.datepicker').datepicker({
             format: 'dd/mm/yyyy',
             autoclose: true,
-            startDate: '0d',
+            
             'language': 'es',
 
             });
 
        });
+
+
        $.fn.datepicker.dates['es'] = {
           days: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
           daysShort: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
@@ -106,5 +208,8 @@
           weekStart: 0
         };
     </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

@@ -8,12 +8,14 @@ namespace SalasInmobiliaria.Controllers
         // GET: HomeController1
         public ActionResult index() 
         {
+            ViewBag.Error = TempData["Error"];
             return View();
         }
 
         // GET: HomeController1/Details/5
         public ActionResult Details(int id)
         {
+
             return View();
         }
 
@@ -78,6 +80,10 @@ namespace SalasInmobiliaria.Controllers
             {
                 return View();
             }
+        }
+        public ActionResult Restringido()
+        {
+            return View();
         }
     }
 }

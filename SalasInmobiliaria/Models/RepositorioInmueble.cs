@@ -3,13 +3,14 @@ using System.Data.SqlClient;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioInmueble
+    public class RepositorioInmueble : RepositorioBase
     {
-		string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
-		public RepositorioInmueble()
-        {
 
-        }
+		public RepositorioInmueble(IConfiguration configuration) : base(configuration)
+		{
+
+		}
+		//string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
 
 		public int Alta(Inmueble inmueble)
 		{

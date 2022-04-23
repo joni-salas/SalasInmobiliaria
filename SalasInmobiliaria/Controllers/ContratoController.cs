@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SalasInmobiliaria.Models;
 
@@ -6,29 +7,32 @@ namespace SalasInmobiliaria.Controllers
 {
     public class ContratoController : Controller
     {
+        protected readonly IConfiguration configuration;
 
         private readonly RepositorioContrato repositorio;
         private readonly RepositorioInquilino repoInquilino;
         private readonly RepositorioInmueble repoInmueble;
         private readonly RepositorioPago repoPago;
 
-        public ContratoController()
+        public ContratoController(IConfiguration configuration)
         {
-            repositorio = new RepositorioContrato();
-            repoInquilino = new RepositorioInquilino();
-            repoInmueble = new RepositorioInmueble();
-            repoPago = new RepositorioPago();
+            this.configuration = configuration;
+            repositorio = new RepositorioContrato(configuration);
+            repoInquilino = new RepositorioInquilino(configuration);
+            repoInmueble = new RepositorioInmueble(configuration);
+            repoPago = new RepositorioPago(configuration);
         }
+        [Authorize]
         // GET: ContratoController
         public ActionResult Index()
         {
             DateTime hoy = DateTime.Today;
-            //var alquilados = repoInmueble.ObtenerAlquilados();
+            var alquilados = repoInmueble.ObtenerAlquilados();
             var lista = repositorio.ObtenerTodos();
             foreach (var item in lista) 
             {
                 if(item.FechaFin == hoy) // si la fechafin es hoy el contrato finaliza y el inmueble vuelve a estar disponible
-                {
+                {                  
                     var inmueble = repoInmueble.ObtenerPorId(item.IdInmueble); // mover esto a homeController(funcionando)
                     inmueble.Estado = "1";
                     repoInmueble.Modificacion(inmueble);
@@ -44,7 +48,66 @@ namespace SalasInmobiliaria.Controllers
             return View(lista);
         }
 
+        //public ActionResult CalcularDesdeHasta(IFormCollection collection)
+        //{
+        //    if(collection != null)
+        //    {
+        //        var desde = Convert.ToDateTime((collection["desde"]));
+        //        var hasta = Convert.ToDateTime((collection["hasta"]));
 
+        //        var lista = repositorio.buscarDesdeHasta(desde, hasta);
+
+        //        return View("Index", lista);
+        //    }
+        //    else
+        //    {
+        //        var listar = repositorio.ObtenerTodos();
+        //        return View("Index", listar);
+        //    }
+
+
+        //}
+        [Authorize]
+        public ActionResult DesdeHasta(string desde, string hasta)
+        {
+            var fechaDesde = Convert.ToDateTime(desde);
+            var fechaHasta = Convert.ToDateTime(hasta); 
+            var contratos = repositorio.ObtenerTodos();
+            List<Contrato> res = new List<Contrato>();
+
+            foreach (var item in contratos)
+            {
+                if(item.FechaInicio>= fechaDesde && item.FechaFin <= fechaHasta)
+                {
+                    res.Add(item);
+                }
+            }
+
+            return View("Index", res);
+        }
+        [Authorize]
+        public ActionResult CancelarContrato(int id)
+        {
+            try
+            {
+                var c = repositorio.ObtenerPorId(id);
+                //hacer metodo en contrato data 
+                Console.WriteLine(c);
+                //repositorio.Modificacion(c);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Inquilino = repoInquilino.obtenerTodos();
+                ViewBag.Inmueble = repoInmueble.ObtenerTodos();
+                ViewBag.Error = ex.Message;
+                ViewBag.StackTrate = ex.StackTrace;
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+
+        [Authorize]
         public ActionResult PorInquilino(int id)
         {
             var lista = repositorio.BuscarPorInquilino(id);
@@ -57,7 +120,7 @@ namespace SalasInmobiliaria.Controllers
             return View("Index", lista);
         }
 
-
+        [Authorize]
         public ActionResult PorInmueble(int id)
         {
             var lista = repositorio.BuscarPorInmueble(id);
@@ -69,7 +132,7 @@ namespace SalasInmobiliaria.Controllers
             //ViewBag.Inmueble = repoInmueble
             return View("Index", lista);
         }
-
+        [Authorize]
         public ActionResult PagoPorContrato(int id)
         {
             var lista = repoPago.BuscarPorContrato(id);
@@ -78,7 +141,7 @@ namespace SalasInmobiliaria.Controllers
             //return View("index",lista);
         }
 
-
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult CrearPago(int id, IFormCollection collection)
@@ -128,13 +191,13 @@ namespace SalasInmobiliaria.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
+        [Authorize]
         // GET: ContratoController/Details/5
         public ActionResult Details(int id)
         {
             return View();
         }
-
+        [Authorize]
         // GET: ContratoController/Create
         public ActionResult Create()
         {
@@ -144,6 +207,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: ContratoController/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection)
@@ -157,11 +221,20 @@ namespace SalasInmobiliaria.Controllers
                     contrato.NombreGarante = collection["NombreGarante"];
                     contrato.TelefonoGarante = collection["TelefonoGarante"];
                     contrato.DniGarante = collection["DniGarante"];
-                    //contrato.Monto = collection["Monto"];
                     contrato.FechaInicio = Convert.ToDateTime(collection["FechaInicio"].ToString());
                     contrato.FechaFin = Convert.ToDateTime(collection["FechaFin"].ToString());
                     contrato.IdInquilino = Int32.Parse(collection["IdInquilino"]);
-                    contrato.IdInmueble = Int32.Parse(collection["IdInmueble"]);        
+                    contrato.IdInmueble = Int32.Parse(collection["IdInmueble"]);
+                    
+                    DateTime hoy = DateTime.Today;
+
+                    if (contrato.FechaInicio < hoy || contrato.FechaFin <= contrato.FechaInicio)
+                    {
+                        //devolver mensaje de error y crear de nuevo
+                        ViewBag.Mensaje = TempData["Mensaje"];
+                        return RedirectToAction(nameof(Index));
+                        
+                    }
 
                     Inmueble ii = repoInmueble.ObtenerPorId(contrato.IdInmueble);
                     contrato.Monto = ii.Precio;
@@ -187,7 +260,7 @@ namespace SalasInmobiliaria.Controllers
                 return View(contrato);
             }
         }
-
+        [Authorize]
         // GET: ContratoController/Edit/5
         public ActionResult Editar(int id)
         {
@@ -202,6 +275,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: ContratoController/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Editar(int id, Contrato contrato)
@@ -235,6 +309,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: ContratoController/Delete/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(int id, Contrato contrato)

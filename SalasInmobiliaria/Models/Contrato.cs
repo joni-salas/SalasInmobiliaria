@@ -20,11 +20,11 @@ namespace SalasInmobiliaria.Models
         public string Monto { get; set; }
         [Required]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        [Display(Name = "Inicio contrato")]
+        [Display(Name = "Fecha inicio")]
         public DateTime FechaInicio { get; set; }
         [Required]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
-        [Display(Name = "Caduca")]
+        [Display(Name = "Fecha fin")]
         public DateTime FechaFin { get; set; }
         [Required]
 

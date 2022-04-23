@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SalasInmobiliaria.Models;
 
@@ -6,16 +7,18 @@ namespace SalasInmobiliaria.Controllers
 {
     public class PagoController : Controller
     {
-
+        protected readonly IConfiguration configuration;
         private readonly RepositorioPago repositorio;
         private readonly RepositorioContrato repoContrato;
 
-        public PagoController()
+        public PagoController(IConfiguration configuration)
         {
-            repositorio = new RepositorioPago();
-            repoContrato = new RepositorioContrato();
+            this.configuration = configuration;
+            repositorio = new RepositorioPago(configuration);
+            repoContrato = new RepositorioContrato(configuration);
         }
         // GET: PagoController
+        [Authorize]
         public ActionResult Index()
         {
             var lista = repositorio.ObtenerTodos();
@@ -28,6 +31,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: PagoController/Details/5
+        [Authorize]
         public ActionResult Details(int id)
         {
             try
@@ -50,6 +54,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: PagoController/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
 
@@ -75,6 +80,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: PagoController/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, IFormCollection collection)
@@ -90,6 +96,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: PagoController/Delete/5
+        [Authorize]
         public ActionResult Eliminar(int id)
         {
 
@@ -102,6 +109,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: PagoController/Delete/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(int id, Pago pago)
