@@ -9,7 +9,7 @@
 <p>
     <a asp-action="Create">Crear nuevo Inquilino</a>
 </p>
-<table class="table">
+<table class="table" id="tabla">
     <thead>
         <tr>
             <th>
@@ -65,3 +65,7 @@
 }
     </tbody>
 </table>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_DataTable");}
+
+}

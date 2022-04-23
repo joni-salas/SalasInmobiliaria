@@ -4,12 +4,12 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Listado de Propietarios</h1>
 
 <p>
-    <a asp-action="Create">Crear Nuevo Propietario</a>
+    <a asp-action="Create">Crear nuevo Propietario</a>
 </p>
-<table class="table">
+<table class="table" id="tabla">
     <thead>
         <tr>
             <th>
@@ -66,3 +66,7 @@
 }
     </tbody>
 </table>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_DataTable");}
+
+}

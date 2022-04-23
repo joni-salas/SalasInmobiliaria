@@ -1,7 +1,22 @@
 ﻿
-@{
-    ViewData["Title"] = "Index";
-}
 
 <h1>Mi Inmobiliaria</h1>
+
+<h5>Bienvenido @User.Identity.Name</h5>
+
+
+
+	@foreach (var c in User.Claims)
+	{
+		<li><b>@(c.Type+": ")</b>@c.Value</li>
+	}
+
+
+@{
+    ViewData["Title"] = "Index";
+    if(!User.Identity.IsAuthenticated)
+        await Html.RenderPartialAsync("_Login", new UsuarioView());
+}
+
+
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SalasInmobiliaria.Models;
 
@@ -6,14 +7,16 @@ namespace SalasInmobiliaria.Controllers
 {
     public class InquilinoController : Controller
     {
-        //RepositorioInquilino repositorio;
+        protected readonly IConfiguration configuration;
         private readonly RepositorioInquilino repositorio;
 
-        public InquilinoController()
+        public InquilinoController(IConfiguration configuration)
         {
-            repositorio = new RepositorioInquilino(); 
+            this.configuration = configuration;
+            repositorio = new RepositorioInquilino(configuration); 
         }
         // GET: InquilinoControllerscs
+        [Authorize]
         public ActionResult Index()
         {
             var lista = repositorio.obtenerTodos();
@@ -21,6 +24,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: InquilinoControllerscs/Details/5
+        [Authorize]
         public ActionResult Detalles(int id)
         {
             var inquilino = repositorio.ObtenerPorId(id);
@@ -28,6 +32,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: InquilinoControllerscs/Create
+        [Authorize]
         public ActionResult Create()
         {
             try
@@ -41,6 +46,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: InquilinoControllerscs/Create
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection)
@@ -71,6 +77,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: InquilinoControllerscs/Edit/5
+        [Authorize]
         public ActionResult Editar(int id)
         {
             var inquilino = repositorio.ObtenerPorId(id);
@@ -78,6 +85,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: InquilinoControllerscs/Edit/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Editar(int id, IFormCollection collection)
@@ -106,6 +114,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // GET: InquilinoControllerscs/Delete/5
+        [Authorize]
         public ActionResult Eliminar(int id)
         {
             var inquilino = repositorio.ObtenerPorId(id);
@@ -113,6 +122,7 @@ namespace SalasInmobiliaria.Controllers
         }
 
         // POST: InquilinoControllerscs/Delete/5
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Eliminar(int id, IFormCollection collection)

@@ -3,16 +3,16 @@ using System.Data.SqlClient;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioPropietario
+    public class RepositorioPropietario : RepositorioBase
     {
-
-        string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
-
-        public RepositorioPropietario()
+        public RepositorioPropietario(IConfiguration configuration) : base(configuration)
         {
 
         }
 
+        //string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+ 
         public int Alta(Propietario p)
         {
             int res = -1;

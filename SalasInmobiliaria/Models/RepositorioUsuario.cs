@@ -3,12 +3,12 @@ using System.Data.SqlClient;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioUsuario
+    public class RepositorioUsuario : RepositorioBase
     {
+        public RepositorioUsuario(IConfiguration configuration) : base(configuration)
+        {
 
-		string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
-
-
+        }
 
 		public int Alta(Usuario e)
 		{
@@ -70,6 +70,30 @@ namespace SalasInmobiliaria.Models
 					command.Parameters.AddWithValue("@avatar", e.Avatar);
 					command.Parameters.AddWithValue("@email", e.Email);
 					command.Parameters.AddWithValue("@clave", e.Clave);
+					command.Parameters.AddWithValue("@rol", e.Rol);
+					command.Parameters.AddWithValue("@id", e.Id);
+					connection.Open();
+					res = command.ExecuteNonQuery();
+					connection.Close();
+				}
+			}
+			return res;
+		}
+
+		public int EditarPerfil(Usuario e)
+		{
+			int res = -1;
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				string sql = $"UPDATE Usuarios SET Nombre=@nombre, Apellido=@apellido, Avatar=@avatar, Email=@email, Rol=@rol " +
+					$"WHERE Id = @id";
+				using (SqlCommand command = new SqlCommand(sql, connection))
+				{
+					command.CommandType = CommandType.Text;
+					command.Parameters.AddWithValue("@nombre", e.Nombre);
+					command.Parameters.AddWithValue("@apellido", e.Apellido);
+					command.Parameters.AddWithValue("@avatar", e.Avatar);
+					command.Parameters.AddWithValue("@email", e.Email);
 					command.Parameters.AddWithValue("@rol", e.Rol);
 					command.Parameters.AddWithValue("@id", e.Id);
 					connection.Open();

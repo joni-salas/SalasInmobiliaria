@@ -4,10 +4,10 @@ using System.Data;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioInquilino
+    public class RepositorioInquilino : RepositorioBase
     {
-        string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
-        public RepositorioInquilino()
+        //string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
+        public RepositorioInquilino(IConfiguration configuration) : base(configuration)
         {
 
         }
