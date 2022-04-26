@@ -127,6 +127,43 @@ namespace SalasInmobiliaria.Models
             return res;
         }
 
+        public IList<Propietario> ObtenerActivosInactivos()
+        {
+            IList<Propietario> res = new List<Propietario>();
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string sql = $"SELECT Id, Nombre, Apellido, Dni, Telefono, Email, Clave, Estado" +
+                    $" FROM Propietario";
+                using (SqlCommand command = new SqlCommand(sql, connection))
+                {
+                    command.CommandType = CommandType.Text;
+                    connection.Open();
+                    var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+
+                        Propietario p = new Propietario
+                        {
+                            Id = reader.GetInt32(0),
+                            Nombre = reader.GetString(1),
+                            Apellido = reader.GetString(2),
+                            Dni = reader.GetString(3),
+                            Telefono = reader.GetString(4),
+                            Email = reader.GetString(5),
+                            Clave = reader.GetString(6),
+                            Estado = reader.GetBoolean(7),
+                        };
+                        
+                        
+                         res.Add(p);
+                        
+                    }
+                    connection.Close();
+                }
+            }
+            return res;
+        }
+
 
         virtual public Propietario ObtenerPorId(int id)
         {

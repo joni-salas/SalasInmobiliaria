@@ -20,6 +20,10 @@ namespace SalasInmobiliaria.Controllers
         public ActionResult Index()
         {
             var lista = repositorio.obtenerTodos();
+            if (TempData.ContainsKey("Id"))
+                ViewBag.Id = TempData["Id"];
+            if (TempData.ContainsKey("Mensaje"))
+                ViewBag.Mensaje = TempData["Mensaje"];
             return View(lista);
         }
 
@@ -64,7 +68,7 @@ namespace SalasInmobiliaria.Controllers
 
                 repositorio.Alta(i);
 
-                TempData["Mensaje"] = "Datos guardados";
+                TempData["Mensaje"] = "Inquilino creado con exito";
 
                 return RedirectToAction(nameof(Index));
 
@@ -103,7 +107,7 @@ namespace SalasInmobiliaria.Controllers
                 i.Email = Convert.ToString(collection["Email"]);
 
                 repositorio.Modificacion(i);
-                TempData["Mensaje"] = "Datos Guardados Correctamente";
+                TempData["Mensaje"] = "Inquilino editado con exito";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -136,7 +140,7 @@ namespace SalasInmobiliaria.Controllers
                 //Console.WriteLine(i.Estado);
                 repositorio.Baja(i);
 
-                TempData["Mensaje"] = "Datos guardados correctamente";
+                TempData["Mensaje"] = "Inquilino eliminado con exito";
 
                 return RedirectToAction(nameof(Index));
             }

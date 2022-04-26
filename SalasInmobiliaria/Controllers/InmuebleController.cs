@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SalasInmobiliaria.Models;
+using static SalasInmobiliaria.Models.Inmueble;
 
 namespace SalasInmobiliaria.Controllers
 {
@@ -10,11 +11,13 @@ namespace SalasInmobiliaria.Controllers
         protected readonly IConfiguration configuration;
         private readonly RepositorioInmueble repositorio;
         private readonly RepositorioPropietario repoPropietario;
+        private readonly RepositorioContrato repoContrato;
         public InmuebleController(IConfiguration configuration)
         {
             this.configuration = configuration;
             repositorio = new RepositorioInmueble(configuration);
             repoPropietario = new RepositorioPropietario(configuration);
+            repoContrato = new RepositorioContrato(configuration);
         }
         // GET: InmuebleController
 
@@ -32,14 +35,83 @@ namespace SalasInmobiliaria.Controllers
         [Authorize]
         public ActionResult PorPropietario(int id)
         {
-            var lista = repositorio.BuscarPorPropietario(id);//repositorio.ObtenerPorPropietario(id);
-            if (TempData.ContainsKey("Id"))
-                ViewBag.Id = TempData["Id"];
-            if (TempData.ContainsKey("Mensaje"))
-                ViewBag.Mensaje = TempData["Mensaje"];
-            ViewBag.Id = id;
-            //ViewBag.Propietario = repoPropietario.
+            var lista = repositorio.BuscarPorPropietario(id);
+
+            ViewBag.Mensaje = "Propietario encontrado.";
             return View("Index", lista);
+        }
+
+        public ActionResult DesdeHastaDisponibles(string desde, string hasta)
+        {
+            var fechaDesde = Convert.ToDateTime(desde);
+            var fechaHasta = Convert.ToDateTime(hasta);
+            var contratos = repoContrato.ObtenerTodos();
+            var inmuebles = repositorio.ObtenerTodos();
+
+            //var contratos = c.OrderBy(var => var.FechaInicio).ToList(); //ordenar el array antes de recorrerlo
+
+            List<Inmueble> InmueblesDescartados = new List<Inmueble>();
+            List<Inmueble> res = new List<Inmueble>();
+
+            if(fechaDesde > fechaHasta)
+            {
+                return View("Index", res);
+            }
+
+            foreach (var item in contratos)
+            {
+                if (fechaDesde <= item.FechaInicio && fechaHasta >= item.FechaFin)
+                {
+
+                    InmueblesDescartados.Add(repositorio.ObtenerPorId(item.IdInmueble));
+                    //no lo puede alquilar
+                    //break;
+                }
+                else if (fechaDesde >= item.FechaInicio && fechaDesde <= item.FechaFin && fechaHasta > item.FechaFin)
+                {
+                    InmueblesDescartados.Add(repositorio.ObtenerPorId(item.IdInmueble));
+                    //no puede alquilar
+                    //break;
+                }
+                else if (fechaDesde <= item.FechaInicio && fechaHasta >= item.FechaInicio && fechaHasta < item.FechaFin)
+                {
+                    InmueblesDescartados.Add(repositorio.ObtenerPorId(item.IdInmueble));
+                    //no puede alquilar
+                    //break;
+                }
+                else if (fechaDesde >= item.FechaInicio && fechaHasta <= item.FechaFin)
+                {
+                    InmueblesDescartados.Add(repositorio.ObtenerPorId(item.IdInmueble));
+                    //no puede alquilar
+                    //break;
+                }
+                //else if (fechaHasta <= item.FechaInicio && fechaHasta <= item.FechaFin)
+                //{
+                //    //no puede alquilar
+                //    //break;
+                //}
+                else
+                {
+
+                    var i = repositorio.ObtenerPorId(item.IdInmueble);
+                    if (!res.Any(x => x.Id ==i.Id))
+                    {
+                        res.Add(i);
+                    }
+                    
+                }
+                
+            }
+            
+
+            var nuncaAlquilados = repositorio.InmueblesNuncaAlquilados();
+
+            res.AddRange(nuncaAlquilados); // agraga una lista a otra
+
+            IEnumerable<Inmueble> resta = res.Except(InmueblesDescartados, new InmuebleComparer()); // guardo en resta la resta entre res y InmueblesDescartados 
+                                                                                                    // Creando clase IEqualityComparer<Inmueble> en Inmueble
+            ViewBag.Id = "Inmuebles desocupados en el periodo de tiempo ingresado";
+            return View("Index", resta);
         }
 
 
@@ -82,7 +154,7 @@ namespace SalasInmobiliaria.Controllers
                     i.IdPropietario = Int32.Parse(collection["IdPropietario"]);
 
                     repositorio.Alta(i);
-                    TempData["Id"] = i.Id;
+                    TempData["Id"] = "Inmueble creado con existo";
                     return RedirectToAction(nameof(Index));
                 }
                 else

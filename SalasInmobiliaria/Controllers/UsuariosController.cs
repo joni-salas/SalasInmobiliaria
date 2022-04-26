@@ -29,6 +29,11 @@ namespace SalasInmobiliaria.Controllers
         public ActionResult Index()
         {
             var usuarios = repositorio.ObtenerTodos();
+            if (TempData.ContainsKey("Id"))
+                ViewBag.Id = TempData["Id"];
+            if (TempData.ContainsKey("Mensaje"))
+                ViewBag.Mensaje = TempData["Mensaje"];
+            ViewBag.Error = TempData["Error"];
             return View(usuarios);
         }
 
@@ -87,6 +92,11 @@ namespace SalasInmobiliaria.Controllers
                     }
                     repositorio.Modificacion(u);
                 }
+                else
+                {
+                    u.Avatar = Path.Combine("/imgPerfil", "avatar.png");  //si no tiene img le asigno una predefinida
+                    repositorio.Modificacion(u);
+                }
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -128,7 +138,7 @@ namespace SalasInmobiliaria.Controllers
                                 numBytesRequested: 256 / 8));
 
                         usser.Clave = hash;
-                        repositorio.Modificacion(usser);
+                        repositorio.CambiarContraseña(usser);
 
                         HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     }
@@ -185,22 +195,29 @@ namespace SalasInmobiliaria.Controllers
             {
                 var usser = repositorio.ObtenerPorId(id);
 
-                //usser.Nombre = u.Nombre;
-                //usser.Apellido = u.Apellido;
-                //usser.Email = u.Email;
-                //usser.Rol = (User.IsInRole("Administrador") || User.IsInRole("SuperAdministrador")) ? u.Rol : (int)enRoles.Empleado;
+                usser.Nombre = u.Nombre;
+                usser.Apellido = u.Apellido;
+                usser.Email = u.Email;
+                usser.Rol = (User.IsInRole("Administrador") || User.IsInRole("SuperAdministrador")) ? u.Rol : (int)enRoles.Empleado;
 
-                if (u.AvatarFile != null)
+
+                if (u.AvatarFile != null && u.Id > 0)
                 {
                     
                     string wwwPath = environment.WebRootPath;
+
+                    if (usser.Avatar != @"/imgPerfil\avatar.png")
+                    {
+                        string urlAvatar = usser.Avatar.Substring(1);             //no funciona sin el SubString(1)
+                        System.IO.File.Delete(Path.Combine(wwwPath, urlAvatar)); // elimino la imagen que tenia antes
+
+                    }
+
                     string path = Path.Combine(wwwPath, "imgPerfil");
                     if (!Directory.Exists(path))
                     {
                         Directory.CreateDirectory(path);
                     }
-
-                    System.IO.File.Delete(Path.Combine(wwwPath, usser.Avatar.Substring(1)));
 
                     //Path.GetFileName(u.AvatarFile.FileName);//este nombre se puede repetir
                     string fileName = "avatar_" + u.Id + Path.GetExtension(u.AvatarFile.FileName);
@@ -214,9 +231,13 @@ namespace SalasInmobiliaria.Controllers
                     }
 
                 }
+                else
+                {
+                    u.Avatar = usser.Avatar;
+                }
 
                 repositorio.EditarPerfil(u);
-               
+                TempData["Mensaje"] = "Usuario Editado con exito";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -229,19 +250,27 @@ namespace SalasInmobiliaria.Controllers
         [Authorize(Policy = "Administrador")]
         public ActionResult Delete(int id)
         {
-            return View();
+            var usser =repositorio.ObtenerPorId(id);
+            return View(usser);
         }
 
         // POST: Usuarios/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "Administrador")]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Usuario u)
         {
             try
             {
-                // TODO: Add delete logic here
+                var usser = repositorio.ObtenerPorId(id);
+                string wwwPath = environment.WebRootPath;
 
+
+                 string urlAvatar = usser.Avatar.Substring(1);             //no funciona sin el SubString(1)
+                 System.IO.File.Delete(Path.Combine(wwwPath, urlAvatar)); // elimino la imagen que tenia antes
+
+                repositorio.Baja(id);
+                TempData["Mensaje"] = "Usuario Eliminado con exito";
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -249,40 +278,40 @@ namespace SalasInmobiliaria.Controllers
                 return View();
             }
         }
-        [Authorize]
-        public IActionResult Avatar()
-        {
-            var u = repositorio.ObtenerPorEmail(User.Identity.Name);
-            string fileName = "avatar_" + u.Id + Path.GetExtension(u.Avatar);
-            string wwwPath = environment.WebRootPath;
-            string path = Path.Combine(wwwPath, "imgPerfil");
-            string pathCompleto = Path.Combine(path, fileName);
+        //[Authorize]
+        //public IActionResult Avatar()
+        //{
+        //    var u = repositorio.ObtenerPorEmail(User.Identity.Name);
+        //    string fileName = "avatar_" + u.Id + Path.GetExtension(u.Avatar);
+        //    string wwwPath = environment.WebRootPath;
+        //    string path = Path.Combine(wwwPath, "imgPerfil");
+        //    string pathCompleto = Path.Combine(path, fileName);
 
-            //leer el archivo
-            byte[] fileBytes = System.IO.File.ReadAllBytes(pathCompleto);
-            //devolverlo
-            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
-        }
+        //    //leer el archivo
+        //    byte[] fileBytes = System.IO.File.ReadAllBytes(pathCompleto);
+        //    //devolverlo
+        //    return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+        //}
 
         // GET: Usuarios/Create
-        [Authorize]
-        public ActionResult Foto()
-        {
-            try
-            {
-                var u = repositorio.ObtenerPorEmail(User.Identity.Name);
-                var stream = System.IO.File.Open(
-                    Path.Combine(environment.WebRootPath, u.Avatar.Substring(1)),
-                    FileMode.Open,
-                    FileAccess.Read);
-                var ext = Path.GetExtension(u.Avatar);
-                return new FileStreamResult(stream, $"image/{ext.Substring(1)}");
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
+        //[Authorize]
+        //public ActionResult Foto()
+        //{
+        //    try
+        //    {
+        //        var u = repositorio.ObtenerPorEmail(User.Identity.Name);
+        //        var stream = System.IO.File.Open(
+        //            Path.Combine(environment.WebRootPath, u.Avatar.Substring(1)),
+        //            FileMode.Open,
+        //            FileAccess.Read);
+        //        var ext = Path.GetExtension(u.Avatar);
+        //        return new FileStreamResult(stream, $"image/{ext.Substring(1)}");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
 
         // GET: Usuarios/Create
         [Authorize]

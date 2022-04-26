@@ -80,6 +80,25 @@ namespace SalasInmobiliaria.Models
 			return res;
 		}
 
+		public int CambiarContraseña(Usuario e)
+		{
+			int res = -1;
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				string sql = $"UPDATE Usuarios SET Clave=@clave" +
+					$"WHERE Id = @id";
+				using (SqlCommand command = new SqlCommand(sql, connection))
+				{
+					command.CommandType = CommandType.Text;
+					command.Parameters.AddWithValue("@clave", e.Clave);
+					command.Parameters.AddWithValue("@id", e.Id);
+					connection.Open();
+					res = command.ExecuteNonQuery();
+					connection.Close();
+				}
+			}
+			return res;
+		}
 		public int EditarPerfil(Usuario e)
 		{
 			int res = -1;
