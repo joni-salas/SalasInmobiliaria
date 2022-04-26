@@ -26,47 +26,17 @@ namespace SalasInmobiliaria.Controllers
         // GET: ContratoController
         public ActionResult Index()
         {
-            DateTime hoy = DateTime.Today;
-            var alquilados = repoInmueble.ObtenerAlquilados();
+
             var lista = repositorio.ObtenerTodos();
-            foreach (var item in lista) 
-            {
-                if(item.FechaFin == hoy) // si la fechafin es hoy el contrato finaliza y el inmueble vuelve a estar disponible
-                {                  
-                    var inmueble = repoInmueble.ObtenerPorId(item.IdInmueble); // mover esto a homeController(funcionando)
-                    inmueble.Estado = "1";
-                    repoInmueble.Modificacion(inmueble);
-
-                }
-            }
-
 
             if (TempData.ContainsKey("Id"))
                 ViewBag.Id = TempData["Id"];
             if (TempData.ContainsKey("Mensaje"))
                 ViewBag.Mensaje = TempData["Mensaje"];
+            ViewBag.Error = TempData["Error"];
             return View(lista);
         }
 
-        //public ActionResult CalcularDesdeHasta(IFormCollection collection)
-        //{
-        //    if(collection != null)
-        //    {
-        //        var desde = Convert.ToDateTime((collection["desde"]));
-        //        var hasta = Convert.ToDateTime((collection["hasta"]));
-
-        //        var lista = repositorio.buscarDesdeHasta(desde, hasta);
-
-        //        return View("Index", lista);
-        //    }
-        //    else
-        //    {
-        //        var listar = repositorio.ObtenerTodos();
-        //        return View("Index", listar);
-        //    }
-
-
-        //}
         [Authorize]
         public ActionResult DesdeHasta(string desde, string hasta)
         {
@@ -82,18 +52,20 @@ namespace SalasInmobiliaria.Controllers
                     res.Add(item);
                 }
             }
-
+            ViewBag.Id = "Contratos encontrados dentro del parametro de fecha ingresado.";
             return View("Index", res);
         }
+
         [Authorize]
         public ActionResult CancelarContrato(int id)
         {
             try
             {
                 var c = repositorio.ObtenerPorId(id);
-                //hacer metodo en contrato data 
-                Console.WriteLine(c);
-                //repositorio.Modificacion(c);
+                DateTime hoy = DateTime.Today;
+                c.FechaFin = hoy;
+                repositorio.CancelarContrato(c);
+                TempData["Mensaje"] = "Contrato cancelado con exito.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -111,11 +83,7 @@ namespace SalasInmobiliaria.Controllers
         public ActionResult PorInquilino(int id)
         {
             var lista = repositorio.BuscarPorInquilino(id);
-            if (TempData.ContainsKey("Id"))
-                ViewBag.Id = TempData["Id"];
-            if (TempData.ContainsKey("Mensaje"))
-                ViewBag.Mensaje = TempData["Mensaje"];
-            ViewBag.Id = id;
+            ViewBag.Id = "Inquilino encontrado con exito.";
             //ViewBag.Inquilino = repoInquilino
             return View("Index", lista);
         }
@@ -124,11 +92,7 @@ namespace SalasInmobiliaria.Controllers
         public ActionResult PorInmueble(int id)
         {
             var lista = repositorio.BuscarPorInmueble(id);
-            if (TempData.ContainsKey("Id"))
-                ViewBag.Id = TempData["Id"];
-            if (TempData.ContainsKey("Mensaje"))
-                ViewBag.Mensaje = TempData["Mensaje"];
-            ViewBag.Id = id;
+            ViewBag.Id = "Inmueble encontrado con exito.";
             //ViewBag.Inmueble = repoInmueble
             return View("Index", lista);
         }
@@ -175,7 +139,7 @@ namespace SalasInmobiliaria.Controllers
                     }
 
                     repoPago.Alta(pago);
-                    TempData["Id"] = pago.Id;
+                    TempData["Id"] = "Pago realizado con exito";
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -228,23 +192,61 @@ namespace SalasInmobiliaria.Controllers
                     
                     DateTime hoy = DateTime.Today;
 
-                    if (contrato.FechaInicio < hoy || contrato.FechaFin <= contrato.FechaInicio)
-                    {
-                        //devolver mensaje de error y crear de nuevo
-                        ViewBag.Mensaje = TempData["Mensaje"];
-                        return RedirectToAction(nameof(Index));
-                        
-                    }
+                    var puede = true;
+                    var contratosDelInmueble = repositorio.BuscarPorInmueble(contrato.IdInmueble);
 
-                    Inmueble ii = repoInmueble.ObtenerPorId(contrato.IdInmueble);
-                    contrato.Monto = ii.Precio;
-                    //test
-                    ii.Estado = "Alquilado";
-                    repoInmueble.Modificacion(ii);
-                    //test
-                    repositorio.Alta(contrato);
-                    TempData["Id"] = contrato.Id;
-                    return RedirectToAction(nameof(Index));
+
+
+                    foreach (var item in contratosDelInmueble)
+                    {
+                        if(contrato.FechaInicio <= item.FechaInicio && contrato.FechaFin >= item.FechaFin)
+                        {
+                            //no lo puede alquilar
+                            puede = false;
+                            break;
+                        }
+                        else if(contrato.FechaInicio <= item.FechaFin && contrato.FechaFin >= item.FechaFin)
+                        {
+                            //no puede alquilar
+                            puede = false;
+                            break;
+                        }
+                        else if(contrato.FechaInicio <= item.FechaInicio && contrato.FechaFin >= item.FechaInicio)
+                        {
+                            //no puede alquilar
+                            puede = false;
+                            break;
+                        }
+                        
+                        else if(contrato.FechaInicio >= item.FechaInicio && contrato.FechaFin <= item.FechaFin)
+                        {
+                            //no puede alquilar
+                            puede = false;
+                            break;
+                        }
+                    }
+                    if (puede)
+                    {
+                        if (contrato.FechaInicio <= contrato.FechaFin)
+                        {
+                            Inmueble ii = repoInmueble.ObtenerPorId(contrato.IdInmueble);
+                            contrato.Monto = ii.Precio;
+                            repositorio.Alta(contrato);
+                            TempData["Id"] = "Contratos creado con exito";
+                            return RedirectToAction(nameof(Index));
+                        }
+                        else
+                        {
+                            TempData["Error"] = "La fecha de fin de contrato no puede ser menor a la de inicio";
+                            return RedirectToAction(nameof(Index));
+                        }
+
+                    }
+                    else
+                    {
+                        TempData["Error"] = "No se puede alquilar el inmueble en esas fechas";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
                 else
                 {

@@ -261,14 +261,15 @@ namespace SalasInmobiliaria.Models
 
 
 
-		public IList<Inmueble> ObtenerAlquilados()
+
+		public IList<Inmueble> InmueblesNuncaAlquilados()
 		{
 			IList<Inmueble> res = new List<Inmueble>();
 			using (SqlConnection connection = new SqlConnection(connectionString))
 			{
 				string sql = "SELECT i.Id, Direccion,Tipo , Ambientes, Precio, Superficie, i.Estado, i.IdPropietario," +
 					" p.Nombre, p.Apellido" +
-					" FROM Inmueble i INNER JOIN Propietario p ON i.IdPropietario = p.Id";
+					" FROM Inmueble i INNER JOIN Propietario p ON i.IdPropietario = p.Id LEFT JOIN Contrato c ON i.Id = c.IdInmueble WHERE c.IdInmueble IS NULL";
 				using (SqlCommand command = new SqlCommand(sql, connection))
 				{
 					command.CommandType = CommandType.Text;
@@ -294,11 +295,10 @@ namespace SalasInmobiliaria.Models
 							}
 						};
 
-                        if (i.Estado == "Alquilado")
-                        {
-							res.Add(i);
-						}
-						
+
+						res.Add(i);
+
+
 					}
 					connection.Close();
 				}

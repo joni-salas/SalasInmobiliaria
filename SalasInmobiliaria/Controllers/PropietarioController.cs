@@ -9,19 +9,25 @@ namespace SalasInmobiliaria.Controllers
     public class PropietarioController : Controller
     {
         private readonly RepositorioPropietario repositorio;
+        private readonly RepositorioInmueble repoInmueble;
         protected readonly IConfiguration configuration;
 
         public PropietarioController(IConfiguration configuration)
         {
             this.configuration = configuration;
             repositorio = new RepositorioPropietario(configuration);
+            repoInmueble = new RepositorioInmueble(configuration);
         }
         // GET: PropietarioController
         [Authorize]
         public ActionResult Index()
         {
-            var lista = repositorio.ObtenerTodos();
-            
+            var lista = repositorio.ObtenerActivosInactivos();
+            if (TempData.ContainsKey("Id"))
+                ViewBag.Id = TempData["Id"];
+            if (TempData.ContainsKey("Mensaje"))
+                ViewBag.Mensaje = TempData["Mensaje"];
+
             return View(lista);
         }
 
@@ -95,6 +101,15 @@ namespace SalasInmobiliaria.Controllers
                 p.Apellido = collection["Apellido"];
                 p.Dni = collection["Dni"];
                 p.Email = collection["Email"];
+                if(collection["Estado"] == "true")
+                {
+                    p.Estado = true;
+                }
+                else
+                {
+                    p.Estado = false;
+                }
+                
                 p.Telefono = collection["Telefono"];
                 //no modifico la clave por aca
                 repositorio.Modificacion(p);
@@ -126,13 +141,18 @@ namespace SalasInmobiliaria.Controllers
             Propietario p = null;
             try
             {
+                var inmuebles = repoInmueble.BuscarPorPropietario(id);
+                foreach (var inmueble in inmuebles)
+                {
+                    repoInmueble.Baja(inmueble);
+                }
 
                 p = repositorio.ObtenerPorId(id);
                 p.Estado = false;
                 //Console.WriteLine(p.Estado);
                 repositorio.Baja(p);
 
-                TempData["Mensaje"] = "Datos guardados correctamente";
+                TempData["Mensaje"] = "Propietario Eliminado con exito";
 
                 return RedirectToAction(nameof(Index));
             }

@@ -286,6 +286,28 @@ namespace SalasInmobiliaria.Models
 		}
 
 
+		public int CancelarContrato(Contrato contrato)
+		{
+			int res = -1;
+			using (SqlConnection connection = new SqlConnection(connectionString))
+			{
+				string sql = "UPDATE Contrato SET " +
+					"FechaFin=@FechaFin " +
+					"WHERE Id = @id";
+				using (SqlCommand command = new SqlCommand(sql, connection))
+				{
+					command.Parameters.AddWithValue("@FechaFin", contrato.FechaFin);
+					command.Parameters.AddWithValue("@id", contrato.Id);
+					command.CommandType = CommandType.Text;
+					connection.Open();
+					res = command.ExecuteNonQuery();
+					connection.Close();
+				}
+			}
+			return res;
+		}
+
+
 
 	}
 

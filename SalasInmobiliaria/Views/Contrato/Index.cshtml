@@ -103,7 +103,7 @@
                @* <button title="Pagos" onclick="llenarTabla(@item.Id)"><i class="fa-solid fa-dollar-sign"></i></button>&nbsp;*@
                 <a id="btnPagos" href="" data-bs-toggle="modal" data-bs-target="#ModalPagos" onclick="llenarTabla(@item.Id);"><i class="fa-solid fa-dollar-sign"></i></a>&nbsp;
                 <a id="btnPagar" href="" data-bs-toggle="modal" data-bs-target="#ModalCrearPago@{@item.Id}" ><i class="fa-solid fa-cart-shopping"></i></a>&nbsp;
-                <a href="" value="Cancelar" type=@(item.Inmu.Estado == "Alquilado" ? "button" : "hidden") data-bs-toggle="modal" data-bs-target="#ModalCancelarContrato"><i class="fa-solid fa-ban"></i></a>
+                <a href="" value="Cancelar" type="button" data-bs-toggle="modal" onclick='calcular("@item.Id","@item.FechaInicio","@item.FechaFin", "@item.Monto")'><i class="fa-solid fa-ban"></i></a>
                 
                 @*-----------------------------------------------------------Modal CREAR PAGO-----------------------------------------------------------*@
 
@@ -141,7 +141,7 @@
                 <!---------------------------------------------------------------- MODAL CANCELAR PAGOS ----------------------------------------------------------->
 
 
-                <div class="modal fade" id="ModalCancelarContrato" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal fade" id="ModalCancelarContrato@{@item.Id}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -149,12 +149,14 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body" >
-                            <form asp-action="CancelarContrato" asp-controller="Contrato" asp-route-id="@item." method="post">
+                            <form asp-action="CancelarContrato" asp-controller="Contrato" asp-route-id=@item.Id method="post">
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     
                                 <div class="form-group" id="ModalBodyCancelar">
                                     <label for="" class="control-label">Cancelar alquiler</label>
-                                    <p id="monto">esto es un p</p>
+    
+                                    <div id="mensaje"></div>
+                                    
                                 </div>
                                     <div class="form-group">
                                         <input type="submit" value="Cancelar" class="btn btn-primary" />
@@ -162,7 +164,7 @@
                             </form>
                         </div>
                         <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="test();">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" >Close</button>
                         </div>
                     </div>
                     </div>
@@ -215,13 +217,52 @@
 </div>
 
 
-<script>
+<script type="text/javascript" >
 
-    function test(){
-        $('#monto').html("");
+    function calcular(id, fechaInicio, fechaFin, monto){
+        var idModal = "#ModalCancelarContrato" + id;
+        
 
-    } 
-    </script>
+        var splitFechaInicio = fechaInicio.split(" ");
+        var splitfechaFin = fechaFin.split(" ");
+
+        var fecha1 = moment(splitFechaInicio);
+        var fecha2 = moment(splitfechaFin);
+        
+        var now = moment();
+
+        var difhoy = now.diff(fecha1, 'days');
+        var dif = fecha2.diff(fecha1, 'days');
+
+        var mitad = dif/2;
+
+        var mensaje = document.getElementById("mensaje");
+
+        @*mensaje.innerHTML = "";*@
+
+        if (mitad > difhoy) {
+            var total = monto * 2;
+            alert("debera pagar como multa $" + total + " pesos por cancelar y permanecer menos de la mitad del tiempo");
+            
+            //mensaje.innerHTML  = "<p> debera pagar como multa $" + total + " pesos por cancelar y permanecer menos de la mitad del tiempo</p>";
+            console.log("si");
+            console.log(mensaje);
+        } else {
+            var total = monto;
+            alert("debera pagar como multa $" + total + " pesos por cancelar y permanecer mas de la mitad del tiempo")
+            //mensaje.innerHTML  = "<p>debera pagar como multa $" + total + " pesos por cancelar y permanecer mas de la mitad del tiempo </p>";
+            console.log(mensaje);
+            console.log("no");
+            
+        }
+
+        $(idModal).modal('show');
+        console.log(mitad);
+        console.log(difhoy);
+    }
+
+
+</script>
 
 
 
@@ -252,39 +293,6 @@
     
 </script>
 
-<script>
-    function calcular(id) {
-
-        $.ajax({//documentación: https://api.jquery.com/jquery.ajax/
-                url: `@Url.Action("CancelarContrato", "Contrato")`,
-                method: "POST",
-                data: {'id': id},
-                dataType: "json"
-              });
-
-        //('#ModalCancelarContrato').modal("show");
-
-        //var fechadesde = $('#' + x + '-FechaInicio')[0].innerText+"";
-        //var fechahasta = $('#' + x + '-FechaFin')[0].innerText + "";
-
-        //var hoy = moment(fec);
-        //var fecha1 = moment(fechadesde);
-        //var fecha2 = moment(fechahasta);
-        //console.log("llego");
-        //var difhoy = hoy.diff(fecha1, 'days');
-        //var dif = fecha2.diff(fecha1, 'days');
-        //var mitad = dif / 2;
-        //if (mitad > difhoy) {
-        //    var total = pre * 2;
-        //    alert("debera pagar como multa $" + total + " pesos por cancelar y permanecer menos de la mitad del tiempo");
-        //} else {
-        //    var total = pre;
-        //    alert("debera pagar como multa $" + total + " pesos por cancelar y permanecer mas de la mitad del tiempo")
-        //}
-        //console.log(dif);
-        //console.log(difhoy);
-    }
-</script>
 @section Scripts {
     @{await Html.RenderPartialAsync("_DataTable");}
 
