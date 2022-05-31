@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioPago : RepositorioBase
+    public class RepositorioPago : RepositorioBase, IRepositorioPago
     {
         public RepositorioPago(IConfiguration configuration) : base(configuration)
 		{

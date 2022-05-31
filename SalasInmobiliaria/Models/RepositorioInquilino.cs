@@ -4,7 +4,7 @@ using System.Data;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioInquilino : RepositorioBase
+    public class RepositorioInquilino : RepositorioBase, IRepositorioInquilino
     {
         //string connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=InmobiliariaSalasDB;Trusted_Connection=True;MultipleActiveResultSets=true";
         public RepositorioInquilino(IConfiguration configuration) : base(configuration)
@@ -39,7 +39,7 @@ namespace SalasInmobiliaria.Models
             return res;
         }
 
-        public IList<Inquilino> obtenerTodos()
+        public IList<Inquilino> ObtenerTodos()
         {
             var res = new List<Inquilino>();
 

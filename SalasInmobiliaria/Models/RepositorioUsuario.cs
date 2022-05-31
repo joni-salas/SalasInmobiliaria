@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioUsuario : RepositorioBase
+    public class RepositorioUsuario : RepositorioBase, IRepositorioUsuario
     {
         public RepositorioUsuario(IConfiguration configuration) : base(configuration)
         {
@@ -38,7 +38,7 @@ namespace SalasInmobiliaria.Models
 			}
 			return res;
 		}
-		public int Baja(int id)
+		public int Baja(Usuario usuario)
 		{
 			int res = -1;
 			using (SqlConnection connection = new SqlConnection(connectionString))
@@ -47,7 +47,7 @@ namespace SalasInmobiliaria.Models
 				using (SqlCommand command = new SqlCommand(sql, connection))
 				{
 					command.CommandType = CommandType.Text;
-					command.Parameters.AddWithValue("@id", id);
+					command.Parameters.AddWithValue("@id", usuario.Id);
 					connection.Open();
 					res = command.ExecuteNonQuery();
 					connection.Close();

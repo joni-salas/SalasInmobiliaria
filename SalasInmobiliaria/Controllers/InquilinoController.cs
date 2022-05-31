@@ -19,7 +19,7 @@ namespace SalasInmobiliaria.Controllers
         [Authorize]
         public ActionResult Index()
         {
-            var lista = repositorio.obtenerTodos();
+            var lista = repositorio.ObtenerTodos();
             if (TempData.ContainsKey("Id"))
                 ViewBag.Id = TempData["Id"];
             if (TempData.ContainsKey("Mensaje"))

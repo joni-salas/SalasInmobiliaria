@@ -102,7 +102,9 @@ namespace SalasInmobiliaria.Controllers
                 }
                 
             }
-            
+
+            //select * from inm where id NOT IN (select inmuebleId from contratos where fechas....)
+
 
             var nuncaAlquilados = repositorio.InmueblesNuncaAlquilados();
 
@@ -193,7 +195,7 @@ namespace SalasInmobiliaria.Controllers
             try
             {
                 i.Id = id;
-                //i.Estado = "1";
+                i.Estado = "1";
                 repositorio.Modificacion(i);
                 TempData["Mensaje"] = "Datos guardados correctamente";
                 return RedirectToAction(nameof(Index));
