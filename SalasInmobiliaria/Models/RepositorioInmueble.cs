@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace SalasInmobiliaria.Models
 {
-    public class RepositorioInmueble : RepositorioBase
+    public class RepositorioInmueble : RepositorioBase, IRepositorioInmueble
     {
 
 		public RepositorioInmueble(IConfiguration configuration) : base(configuration)
@@ -260,8 +260,6 @@ namespace SalasInmobiliaria.Models
 		}
 
 
-
-
 		public IList<Inmueble> InmueblesNuncaAlquilados()
 		{
 			IList<Inmueble> res = new List<Inmueble>();
@@ -305,6 +303,15 @@ namespace SalasInmobiliaria.Models
 			}
 			return res;
 		}
+
+
+
+		//@" SELECT i.id,i.direccion,i.ambiente,i.superficie,i.latitud,i.longitud,i.idPropietario,P.nombre ,P.apellido,i.precio,i.estado 
+  //              From(SELECT * FROM Inmueble i left join 
+  //              (SELECT  idInmueble FROM Contrato c WHERE ((c.fechaDesde between @desde  and @hasta) 
+  //              or (c.fechaHasta between @desde and @hasta)) and c.idInmueble != @id) x on (i.id = x.idInmueble)
+  //              where x.idInmueble is null and i.estado = 0) i  INNER JOIN Propietario P ON i.idPropietario = P.idPropietario;";
+  //              using (SqlCommand com = new SqlCommand(sql, con))
 
 
 	}

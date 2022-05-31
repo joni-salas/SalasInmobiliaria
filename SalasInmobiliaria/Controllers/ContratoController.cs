@@ -70,7 +70,7 @@ namespace SalasInmobiliaria.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Inquilino = repoInquilino.obtenerTodos();
+                ViewBag.Inquilino = repoInquilino.ObtenerTodos();
                 ViewBag.Inmueble = repoInmueble.ObtenerTodos();
                 ViewBag.Error = ex.Message;
                 ViewBag.StackTrate = ex.StackTrace;
@@ -165,7 +165,7 @@ namespace SalasInmobiliaria.Controllers
         // GET: ContratoController/Create
         public ActionResult Create()
         {
-            ViewBag.Inquilino = repoInquilino.obtenerTodos();
+            ViewBag.Inquilino = repoInquilino.ObtenerTodos();
             ViewBag.Inmueble = repoInmueble.ObtenerTodos();
             return View();
         }
@@ -250,7 +250,7 @@ namespace SalasInmobiliaria.Controllers
                 }
                 else
                 {
-                    ViewBag.Inquilino = repoInquilino.obtenerTodos();
+                    ViewBag.Inquilino = repoInquilino.ObtenerTodos();
                     ViewBag.Inmueble = repoInmueble.ObtenerTodos();
                     return View(contrato);
                 }
@@ -267,7 +267,7 @@ namespace SalasInmobiliaria.Controllers
         public ActionResult Editar(int id)
         {
             var contrato = repositorio.ObtenerPorId(id);
-            ViewBag.Inquilino = repoInquilino.obtenerTodos();
+            ViewBag.Inquilino = repoInquilino.ObtenerTodos();
             ViewBag.Inmueble = repoInmueble.ObtenerTodos();
             if (TempData.ContainsKey("Mensaje"))
                 ViewBag.Mensaje = TempData["Mensaje"];
@@ -291,7 +291,7 @@ namespace SalasInmobiliaria.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Inquilino = repoInquilino.obtenerTodos();
+                ViewBag.Inquilino = repoInquilino.ObtenerTodos();
                 ViewBag.Inmueble = repoInmueble.ObtenerTodos();
                 ViewBag.Error = ex.Message;
                 ViewBag.StackTrate = ex.StackTrace;

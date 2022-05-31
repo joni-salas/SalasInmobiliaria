@@ -19,7 +19,11 @@ namespace SalasInmobiliaria.Models
         [Display(Name = "Dueño")]
         public int IdPropietario { get; set; }
         [ForeignKey(nameof(IdPropietario))]
-        public Propietario prop { get; set; }
+        public string Imagen { get; set; }
+        [NotMapped]
+        public string ImgGuardar { get; set; }
+        [NotMapped]
+        public Propietario? prop { get; set; }
 
         public override string ToString()
         {

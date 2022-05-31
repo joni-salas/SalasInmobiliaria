@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,6 @@ using System.Security.Claims;
 
 namespace SalasInmobiliaria.Controllers
 {
-    
 
     public class UsuariosController : Controller
     {
@@ -269,7 +269,7 @@ namespace SalasInmobiliaria.Controllers
                  string urlAvatar = usser.Avatar.Substring(1);             //no funciona sin el SubString(1)
                  System.IO.File.Delete(Path.Combine(wwwPath, urlAvatar)); // elimino la imagen que tenia antes
 
-                repositorio.Baja(id);
+                repositorio.Baja(u);
                 TempData["Mensaje"] = "Usuario Eliminado con exito";
                 return RedirectToAction(nameof(Index));
             }

@@ -5,7 +5,7 @@ namespace SalasInmobiliaria.Models
     public class Propietario
     {
 
-
+        [Key]
         [Display(Name = "Código")]
         public int Id { get; set; }
         [Required]
