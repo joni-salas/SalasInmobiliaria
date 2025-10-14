@@ -27,23 +27,33 @@ namespace SalasInmobiliaria.Api
             this.environment = environment;
         }
 
-        // GET: api/<controller>
         [HttpGet("obtener")]
         public async Task<ActionResult<List<Inmueble>>> Get()
         {
 
             try
             {
+                var email = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Unauthorized("Claim de usuario no encontrado");
+                }
 
-                var email = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+                var propietario = await contexto.Propietario
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Email == email);
 
-                var propietario = await contexto.Propietario.FirstOrDefaultAsync(x => x.Email == email);
+                if (propietario == null)
+                {
+                    return NotFound("Propietario no encontrado");
+                }
 
-                var inmuebles = await contexto.Inmueble.Where(x => x.IdPropietario == propietario.Id).ToListAsync();
+                var inmuebles = await contexto.Inmueble
+                    .AsNoTracking()
+                    .Where(x => x.IdPropietario == propietario.Id)
+                    .ToListAsync();
                 
-
                 return inmuebles;
-
 
             }
             catch (Exception ex)
@@ -57,51 +67,77 @@ namespace SalasInmobiliaria.Api
         [HttpGet("contrato")]
         public async Task<ActionResult<List<Inmueble>>> GetAlquilados()
         {
-
             try
             {
+                var email = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Unauthorized("Claim de usuario no encontrado");
+                }
 
-                var email = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
+                var propietario = await contexto.Propietario
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Email == email);
 
-                var propietario = await contexto.Propietario.FirstOrDefaultAsync(x => x.Email == email);
+                if (propietario == null)
+                {
+                    return NotFound("Propietario no encontrado");
+                }
 
-                var inmuebles = await contexto.Inmueble.Join(
-                    contexto.Contrato.Where(x => x.FechaFin > DateTime.Now && x.FechaInicio < DateTime.Now),
-                    inm => inm.Id,
-                    com => com.IdInmueble,
-                    (inm, com) => inm)
-                    .Where(x => x.IdPropietario == propietario.Id).ToListAsync();
+                var fechaAhora = DateTime.Now;
+
+                var inmueblesIds = contexto.Contrato
+                    .AsNoTracking()
+                    .Where(x => x.FechaFin > fechaAhora && x.FechaInicio < fechaAhora)
+                    .Select(c => c.IdInmueble)
+                    .Distinct();
+
+                var inmuebles = await contexto.Inmueble
+                    .AsNoTracking()
+                    .Where(x => x.IdPropietario == propietario.Id && inmueblesIds.Contains(x.Id))
+                    .ToListAsync();
 
                 return inmuebles;
-
 
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
-
             }
         }
-
 
         [HttpPost("crear")]
         public async Task<IActionResult> Post([FromBody] Inmueble inmueble)
         {
-
             try
             {
-                var email = HttpContext.User.FindFirst(ClaimTypes.Name).Value;
-                var propietario = await contexto.Propietario.FirstOrDefaultAsync(x => x.Email == email);
-                inmueble.IdPropietario = propietario.Id;
-                inmueble.prop = propietario;
-
-                if (inmueble.ImgGuardar != null && inmueble.ImgGuardar != "")
+                var email = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+                if (string.IsNullOrEmpty(email))
                 {
+                    return Unauthorized("Claim de usuario no encontrado");
+                }
 
+                var propietario = await contexto.Propietario.FirstOrDefaultAsync(x => x.Email == email);
+                if (propietario == null)
+                {
+                    return NotFound("Propietario no encontrado");
+                }
 
-                    var stream1 = new MemoryStream(Convert.FromBase64String(inmueble.ImgGuardar));
-                    IFormFile ImagenFile = new FormFile(stream1, 0, stream1.Length, "inmueble", ".jpg");
-                    string wwwPath = environment.WebRootPath;
+                inmueble.IdPropietario = propietario.Id;
+
+                if (!string.IsNullOrWhiteSpace(inmueble.ImgGuardar))
+                {
+                    byte[] imageBytes;
+                    try
+                    {
+                        imageBytes = Convert.FromBase64String(inmueble.ImgGuardar);
+                    }
+                    catch (FormatException)
+                    {
+                        return BadRequest("Imagen en formato Base64 inválida");
+                    }
+
+                    string wwwPath = environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                     string path = Path.Combine(wwwPath, "imgInmueble");
 
                     if (!Directory.Exists(path))
@@ -109,34 +145,26 @@ namespace SalasInmobiliaria.Api
                         Directory.CreateDirectory(path);
                     }
 
-                    Random r = new Random();
-                    string fileName = "inmueble_" + inmueble.IdPropietario + r.Next(0, 100000) + Path.GetExtension(ImagenFile.FileName);
+                    string fileName = $"inmueble_{inmueble.IdPropietario}_{Guid.NewGuid():N}.jpg";
                     string pathCompleto = Path.Combine(path, fileName);
 
-                    //guardo el path(URL) donde se encuentra la imagen del inmueble 
-                    inmueble.Imagen = Path.Combine("/imgInmueble", fileName);
-                    using (FileStream stream = new FileStream(pathCompleto, FileMode.Create))
-                    {
-                        ImagenFile.CopyTo(stream);
-                    }
+                    // Escribir archivos async
+                    await System.IO.File.WriteAllBytesAsync(pathCompleto, imageBytes);
 
-                    contexto.Add(inmueble);
-                    await contexto.SaveChangesAsync();
-                    return CreatedAtAction(nameof(Get), new { id = inmueble.Id }, inmueble);
+                    // Guardar la ruta base
+                    inmueble.Imagen = Path.Combine("/imgInmueble", fileName);
+
+                    // Limpiar el campo
+                    inmueble.ImgGuardar = null;
                 }
                 else
                 {
-
-
-                    inmueble.Imagen = Path.Combine("/imgInmueble", "inmuebleBase.jpg");  //si no tiene img le asigno una predefinida
-
-
-                    contexto.Add(inmueble);
-                    await contexto.SaveChangesAsync();
-                    return CreatedAtAction(nameof(Get), new { id = inmueble.Id }, inmueble);
-
-                    //return BadRequest("Debe crear su inmueble con imagen");
+                    inmueble.Imagen = Path.Combine("/imgInmueble", "inmuebleBase.jpg");
                 }
+
+                contexto.Add(inmueble);
+                await contexto.SaveChangesAsync();
+                return CreatedAtAction(nameof(Get), new { id = inmueble.Id }, inmueble);
 
             }
             catch (Exception ex)
@@ -182,11 +210,7 @@ namespace SalasInmobiliaria.Api
             {
                 return BadRequest(ex.Message);
             }
-
-
         }
-
-
 
         // BAJA LOGICA INMUEBLE
         [HttpDelete("BajaLogica/{id}")]
@@ -194,15 +218,40 @@ namespace SalasInmobiliaria.Api
         {
             try
             {
-                var entidad = contexto.Inmueble.Include(e => e.prop).FirstOrDefault(e => e.Id == id && e.prop.Email == User.Identity.Name);
-                if (entidad != null)
+                var email = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+                if (string.IsNullOrEmpty(email))
                 {
-                    entidad.Estado = "0";
-                    contexto.Inmueble.Update(entidad);
-                    contexto.SaveChanges();
-                    return Ok();
+                    return Unauthorized("Claim de usuario no encontrado");
                 }
-                return BadRequest();
+
+                var propietario = await contexto.Propietario
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.Email == email);
+
+                if (propietario == null)
+                {
+                    return NotFound("Propietario no encontrado");
+                }
+
+                var existeInmueble = await contexto.Inmueble
+                    .AsNoTracking()
+                    .AnyAsync(i => i.Id == id && i.IdPropietario == propietario.Id);
+
+                if (!existeInmueble)
+                {
+                    return NotFound();
+                }
+
+                // Actualizar solo el campo Estado sin traer el registro completo
+                var inmueble = new Inmueble { Id = id, Estado = "0" };
+                //attach para indicar que el objeto existe
+                contexto.Inmueble.Attach(inmueble);
+                // Indicar que solo se modificará el campo Estado
+                contexto.Entry(inmueble).Property(x => x.Estado).IsModified = true;
+
+                await contexto.SaveChangesAsync();
+
+                return Ok();
             }
             catch (Exception ex)
             {

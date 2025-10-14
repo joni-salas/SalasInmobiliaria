@@ -63,7 +63,15 @@ namespace SalasInmobiliaria.Controllers
                 p.Clave = collection["Clave"];
                 p.Estado = true;
 
-                // preguntar como hashear la clave del propietario
+                string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: p.Clave,
+                salt: System.Text.Encoding.ASCII.GetBytes(configuration["Salt"]),
+                prf: KeyDerivationPrf.HMACSHA1,
+                iterationCount: 1000,
+                numBytesRequested: 256 / 8));
+
+                p.Clave = hashed;
+
                 repositorio.Alta(p);
 
                 TempData["Mensaje"] = "Propietario creado correctamente";

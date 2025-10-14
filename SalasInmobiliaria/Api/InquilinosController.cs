@@ -49,33 +49,21 @@ namespace SalasInmobiliaria.Api
 
                 var inquilino = inquilino2.Last();
 
-
-
-
                 return inquilino;
-
-                //return inquilino;
-
 
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message.ToString());
-
             }
 
-
-
-
         }
-
 
         [HttpGet]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
-
 
         // POST api/<InquilinoController>
         [HttpPost]
