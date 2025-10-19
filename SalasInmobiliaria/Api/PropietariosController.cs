@@ -350,10 +350,6 @@ namespace SalasInmobiliaria.Api
                 if (propietario == null)
                     return NotFound();
 
-                //var hashedActual = HashPassword(modelo.ClaveActual);
-                //if (!string.Equals(hashedActual, propietario.Clave, StringComparison.Ordinal))
-                //    return BadRequest("Contraseña actual incorrecta");
-
                 var hashedNueva = HashPassword(modelo.ClaveNueva);
                 if (string.Equals(hashedNueva, propietario.Clave, StringComparison.Ordinal))
                     return BadRequest("La nueva contraseña no puede ser igual a la actual");

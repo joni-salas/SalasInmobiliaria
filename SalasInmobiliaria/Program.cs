@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+ï»¿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container. 
 builder.Services.AddControllersWithViews();
-             // asi se solicitan los servicios de autenticacion y autorizacion en .NET 6
+// asi se solicitan los servicios de autenticacion y autorizacion en .NET 6
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>//el sitio web valida con cookie
@@ -40,17 +40,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
     });
 
-    //Autorizaciones
+//Autorizaciones
 builder.Services.AddAuthorization(options =>
-    {
-        options.AddPolicy("Empleado", policy => policy.RequireClaim(ClaimTypes.Role, "Administrador", "Empleado"));
-        options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador", "SuperAdministrador"));
-    });
+{
+    options.AddPolicy("Empleado", policy => policy.RequireClaim(ClaimTypes.Role, "Administrador", "Empleado"));
+    options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador", "SuperAdministrador"));
+});
 
 
 builder.Services.AddDbContext<DataContext>(
     options => options.UseSqlServer(
-        builder.Configuration["ConnectionStrings:DefaultConnection"]
+        //builder.Configuration["ConnectionStrings:DefaultConnection"]
+        builder.Configuration.GetConnectionString("File")
     )
 );
 
@@ -64,7 +65,7 @@ builder.Services.AddTransient<IRepositorioPago, RepositorioPago>();
 builder.Services.AddTransient<IRepositorioInmueble, RepositorioInmueble>();
 
 builder.Services.AddMvc();
-builder.Services.AddSignalR();//añade signalR
+builder.Services.AddSignalR();//aï¿½ade signalR
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -88,8 +89,8 @@ app.UseAuthorization();
 
 //mapControllerRoute es para generar una nueva ruta
 app.MapControllerRoute(
-    name:"login", 
-    pattern:"entrar/{**accion}", new { controller = "Usuarios", action = "Login" });
+    name: "login",
+    pattern: "entrar/{**accion}", new { contrfoller = "Usuarios", action = "Login" });
 
 app.MapControllerRoute(
     name: "fecha",
